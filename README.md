@@ -63,3 +63,9 @@ and use this ip to access on the web resources like this ```http://your-minikube
 
 - Get all the services: ```curl http://localhost:8500/v1/agent/services```.
 - Deregister one specific service: ```curl -X PUT  http://localhost:8500/v1/agent/service/deregister/:service_id ```
+
+# Some screenshot 
+
+![](images/consul_services.png)
+
+![](images/consul_key_value.png)
