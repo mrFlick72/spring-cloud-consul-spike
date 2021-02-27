@@ -1,54 +1,57 @@
-minikube start --vm-driver=virtualbox --cpus 4 --memory 8192 -p consul
-minikube start --vm-driver=virtualbox -p consul
+# Environments requirements
+In this spike I will use minikube like k8s local environment. In order to speed up a fresh minikube instance for this purpose 
+you can use this commnad:
+```minikube start --vm-driver=virtualbox --cpus 4 --memory 8192 -p consul```
 
-eval $(minikube --profile consul docker-env)
+tip. if you want restart a consul minukube instance you can do like below:
+```minikube start --vm-driver=virtualbox -p consul```
 
-docker build -t mrflick72/consule-spike_hello-service:latest .
+# Application build
+All the applications are spring cloud app, you have compile with mvn command and then build the images.
 
-docker build -t mrflick72/consule-spike_hello-service-client:latest .
+first tip type this command in the docker build shell in order to use the same local docker registry of miniukbe otherwise 
+you will not be able to use the built docker image for your minikube environment. 
+```eval $(minikube --profile consul docker-env)```
 
+after that move with the same shell session in which you had run the previous command under helloservice folder 
+build with maven and typ this command ```docker build -t mrflick72/consule-spike_hello-service:latest .``` 
+do the same for helloservice-client but of course use a different command for build docker image like this 
+```docker build -t mrflick72/consule-spike_hello-service-client:latest .```
+
+And that's all images built
+
+# Consul installation
+In order to install a consul cluster in your minikube environment one option is the follow.
+- install helm in your local pc
+- add bitnami helm chat in your repo with this command ```helm repo add bitnami https://charts.bitnami.com/bitnami```
+- install the helm chart ```helm install consul bitnami/consul```
+
+in order to uninstall consul you can do with the usual helm command like this: ```helm uninstall consul```
+
+after this simple step you can apply a service portforward to the ui service in order to access to the consul ui like below: 
+
+```
 kubectl port-forward svc/consul-ui 8500:80
 http://localhost:8500/ui
-
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install consul bitnami/consul
-helm install consul bitnami/consul
-helm uninstall consul 
-
-
-```
-NAME: consul
-LAST DEPLOYED: Fri Feb 26 12:55:42 2021
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-** Please be patient while the chart is being deployed **
-
-  Consul can be accessed within the cluster on port 8300 at consul-headless.default.svc.cluster.local
-
-In order to access to the Consul Web UI:
-
-1. Get the Consul URL by running these commands:
-
-    kubectl port-forward --namespace default svc/consul-ui 80:80
-    echo "Consul URL: http://127.0.0.1:80"
-
-2. Access ASP.NET Core using the obtained URL.
-
-Please take into account that you need to wait until a cluster leader is elected before using the Consul Web UI.
-
-In order to check the status of the cluster you can run the following command:
-
-    kubectl exec -it consul-0 -- consul members
-
-Furthermore, to know which Consul node is the cluster leader run this other command:
-
-    kubectl exec -it consul-0 -- consul operator raft list-peers
-
 ```
 
+# Distributed configuration
+In order to delivery dynamic configurations in this spike I experimented consul key/value feature.
+Only one project will benefit of thsi feature due to I require only in one project, in order to facilitate the job I provided 
+a terraform script under config folder that facilitate the configuration step.
+
+first apply portforwarding for the consul-headless service in order to connect from your local pc to the remote consul on minikube
+
+```kubectl port-forward svc/consul-headless 8500:8500```
+
+then type the command ```terraform init``` in order to initialize terraform for use consul provider, then apply the command 
+```terraform apply -auto-approve``` and that's it.
 
 
-docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate": true}' consul agent -bind=172.17.0.9
+# App installation
+After that consul is installed, applications are built and pushed in your local shared with minikube docker registry you have to 
+install you app in kubernetes. in order to do that you can move under the single project folder and use the command
+```kubectl apply -f kubernetes.yml``` in order to install the two applications.
+
+In order to test all the flow you should get the local ip fo you minikube cluster with this command ```minikube ip -p consul``` 
+and use this ip to access on the web resources like this ```http://your-minikube-ip/hello-service-client/say-hello-to/valerio```
