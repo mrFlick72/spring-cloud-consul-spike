@@ -23,7 +23,7 @@ data:
           port: 8500
           discovery:
             preferIpAddress: true
-            healthCheckInterval: 15s
+            healthCheckInterval: 5s
             healthCheckPath: /hello-service/actuator/health
             health-check-url: http://${spring.cloud.client.ip-address}:8080/hello-service/actuator/health
     server:
@@ -39,7 +39,7 @@ metadata:
   labels:
     app: hello-service
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: hello-service

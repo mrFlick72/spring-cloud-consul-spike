@@ -24,7 +24,7 @@ And that's all images built
 In order to install a consul cluster in your minikube environment one option is the follow.
 - install helm in your local pc
 - add bitnami helm chat in your repo with this command ```helm repo add bitnami https://charts.bitnami.com/bitnami```
-- install the helm chart ```helm install consul bitnami/consul```
+- install the helm chart ```helm install consul -f values.yaml bitnami/consul```
 
 in order to uninstall consul you can do with the usual helm command like this: ```helm uninstall consul```
 
@@ -34,6 +34,8 @@ after this simple step you can apply a service portforward to the ui service in 
 kubectl port-forward svc/consul-ui 8500:80
 http://localhost:8500/ui
 ```
+
+for chart customization please refer to this [link](https://github.com/bitnami/charts/tree/master/bitnami/consul)
 
 # Distributed configuration
 In order to delivery dynamic configurations in this spike I experimented consul key/value feature.
@@ -55,3 +57,9 @@ install you app in kubernetes. in order to do that you can move under the single
 
 In order to test all the flow you should get the local ip fo you minikube cluster with this command ```minikube ip -p consul``` 
 and use this ip to access on the web resources like this ```http://your-minikube-ip/hello-service-client/say-hello-to/valerio```
+
+
+# Basic Consul admin
+
+- Get all the services: ```curl http://localhost:8500/v1/agent/services```.
+- Deregister one specific service: ```curl -X PUT  http://localhost:8500/v1/agent/service/deregister/:service_id ```
