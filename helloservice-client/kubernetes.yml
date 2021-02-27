@@ -6,6 +6,11 @@ metadata:
     app: hello-service-client
 data:
   application.yml: |
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
     hello-service:
       uri: http://helloservice:8080/hello-service/hello/
     spring:
@@ -19,7 +24,7 @@ data:
             preferIpAddress: true
             healthCheckInterval: 15s
             healthCheckPath: /hello-service-client/actuator/health
-            health-check-url: http://hello-service-client:8080/hello-service-client/actuator/health
+            health-check-url: http://${spring.cloud.client.ip-address}:8080/hello-service-client/actuator/health
     server:
       servlet:
         context-path: /hello-service-client
