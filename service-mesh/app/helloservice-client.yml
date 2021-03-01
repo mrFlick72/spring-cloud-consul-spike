@@ -12,19 +12,11 @@ data:
           exposure:
             include: "*"
     hello-service:
-      uri: http://helloservice:8080/hello-service/hello/
+      uri: http://hello-service:8080/hello-service/hello/
     spring:
       application:
-        name: helloservice-client
-      cloud:
-        consul:
-          host: http://consul-headless
-          port: 8500
-          discovery:
-            preferIpAddress: true
-            healthCheckInterval: 15s
-            healthCheckPath: /hello-service-client/actuator/health
-            health-check-url: http://${spring.cloud.client.ip-address}:8080/hello-service-client/actuator/health
+        name: hello-service-client
+
     server:
       servlet:
         context-path: /hello-service-client
@@ -46,6 +38,9 @@ spec:
     metadata:
       labels:
         app: hello-service-client
+      annotations:
+        'consul.hashicorp.com/connect-inject': 'true'
+        'consul.hashicorp.com/connect-service': 'hello-service-client'
     spec:
       volumes:
         - name: application-config

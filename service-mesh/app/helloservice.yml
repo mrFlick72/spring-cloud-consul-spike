@@ -13,19 +13,13 @@ data:
             include: "*"
     spring:
       application:
-        name: helloservice
+        name: hello-service
       cloud:
         consul:
           config:
             enabled: true
             format: YAML
-          host: http://consul-headless
-          port: 8500
-          discovery:
-            preferIpAddress: true
-            healthCheckInterval: 5s
-            healthCheckPath: /hello-service/actuator/health
-            health-check-url: http://${spring.cloud.client.ip-address}:8080/hello-service/actuator/health
+
     server:
       servlet:
         context-path: /hello-service
@@ -47,13 +41,16 @@ spec:
     metadata:
       labels:
         app: hello-service
+      annotations:
+        'consul.hashicorp.com/connect-inject': 'true'
+        'consul.hashicorp.com/connect-service': 'hello-service'
     spec:
       volumes:
         - name: application-config
           configMap:
             name: hello-service
       containers:
-        - name: application
+        - name: hello-service
           image: mrflick72/consule-spike_hello-service:latest
           imagePullPolicy: Never
           ports:
